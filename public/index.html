@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IA Script Maker</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #10131c;
+      color: white;
+    }
+    header {
+      padding: 24px;
+      background: #191e2b;
+      border-bottom: 1px solid #30394c;
+    }
+    h1 { color: #70e1a1; margin-bottom: 8px; }
+    main {
+      max-width: 850px;
+      margin: 35px auto;
+      padding: 20px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      box-sizing: border-box;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #404a60;
+      background: #191e2b;
+      color: white;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 13px 20px;
+      background: #70e1a1;
+      border: 0;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #191e2b;
+      padding: 18px;
+      border-radius: 10px;
+      min-height: 50px;
+    }
+    .nota { color: #b6bfd0; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎮 IA Script Maker</h1>
+    <div>Seu ajudante para criar scripts no Roblox Studio</div>
+  </header>
+
+  <main>
+    <h2>O que você quer criar?</h2>
+    <p class="nota">Exemplo: quero uma porta que abra quando o jogador apertar E.</p>
+
+    <textarea id="pedido" placeholder="Descreva seu jogo e o script que você quer..."></textarea>
+    <br>
+    <button id="gerar">Criar script</button>
+    <p id="status" class="nota"></p>
+
+    <h2>Seu script</h2>
+    <pre id="resultado">Seu código aparecerá aqui.</pre>
+    <button id="copiar">Copiar código</button>
+  </main>
+
+  <script>
+    const pedido = document.getElementById("pedido");
+    const resultado = document.getElementById("resultado");
+    const status = document.getElementById("status");
+
+    document.getElementById("gerar").onclick = async () => {
+      status.textContent = "Preparando...";
+      try {
+        const resposta = await fetch("/api/gerar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pedido: pedido.value })
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok) throw new Error(dados.erro || "Erro");
+        resultado.textContent = dados.codigo;
+        status.textContent = "Script preparado!";
+      } catch (erro) {
+        status.textContent = "Não foi possível conectar ao servidor. Tente novamente depois.";
+      }
+    };
+
+    document.getElementById("copiar").onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(resultado.textContent);
+        status.textContent = "Código copiado!";
+      } catch {
+        status.textContent = "Selecione e copie o código manualmente.";
+      }
+    };
+  </script>
+</body>
+</html>
